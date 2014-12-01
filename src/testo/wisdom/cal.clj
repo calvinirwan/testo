@@ -52,9 +52,65 @@
                      {:user-id 2 :qid 1 :answer 3}
                      {:user-id 1 :qid 2 :answer 2}]))
 
+(def user-answers (atom[{:user user1 :q question0 :u-ans "lala"}
+                        {:user user0 :q question0 :u-ans "ba"
+                         }
+                        {:user user0 :q question10 :u-ans "ba"}]))
+
+(def answer0 {:correct-answer "lala"})
+(def question0 {:text "what ?"
+                :answer answer0})
+(def quiz0 {:quetions [question0
+                       question10]})
+
 (def skor (atom))
 (defn put-answer
   "put salah benar ke db untuk masing2 user"
-  [user-id qid answer]
-  (* 1 2)
+  [user q u-ans]
+  (swap! user-answers (conj @user-answers {:user user :q q :u-ans u-ans}))
   )
+
+
+(defn validate-answer
+  [q u-ans]
+  (= (:correct-answer (:answer q)) (:u-ans u-ans)))
+
+(defn get-result-qusetion
+  [user-answer]
+  (validate-answer (:q user-answer) (:u-ans user-answer)))
+
+(foo 'a0 ['q0 'q1])
+
+[{:a 'a0
+ :b 'q0
+  :c 'c0}
+ {:a 'a0
+ :b 'q1
+  :c 'c0}
+ {:a 'a1
+ :b 'q0
+  :c 'c0}]
+
+[{:a 'a0
+ :b 'q0
+  :c 'c0}
+ {:a 'a0
+ :b 'q1
+  :c 'c0}]
+
+(defn get-user-answer-from-questions
+  [user questions]
+  (let []))
+
+(defn get-user-answer
+  [user quiz]
+  (let [questions (:questions quiz)
+        u-ans (get-user-answer-from-questions user questions)]
+    u-ans))
+
+(defn get-result-quiz
+  [user quiz]
+  (let [user-ans (get-user-answer user quiz)
+        score (get-score user-ans)
+        history (get-history user-ans)]
+    {:score score :history history}))
