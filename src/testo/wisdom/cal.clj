@@ -52,18 +52,28 @@
                      {:user-id 2 :qid 1 :answer 3}
                      {:user-id 1 :qid 2 :answer 2}]))
 
+
+(def user0 {:name "budi"})
+(def user1 {:name "calvin"})
+
+(def answer0 {:correct-answer "lala"})
+(def answer10 {:correct-answer "brute"})
+
+(def question0 {:text "what ?"
+                :answer answer0})
+(def question10 {:text "why ?"
+                 :answer answer0})
+
+
 (def user-answers (atom[{:user user1 :q question0 :u-ans "lala"}
                         {:user user0 :q question0 :u-ans "ba"
                          }
                         {:user user0 :q question10 :u-ans "ba"}]))
 
-(def answer0 {:correct-answer "lala"})
-(def question0 {:text "what ?"
-                :answer answer0})
 (def quiz0 {:quetions [question0
                        question10]})
 
-(def skor (atom))
+(def skor (atom []))
 (defn put-answer
   "put salah benar ke db untuk masing2 user"
   [user q u-ans]
@@ -79,7 +89,11 @@
   [user-answer]
   (validate-answer (:q user-answer) (:u-ans user-answer)))
 
-(foo 'a0 ['q0 'q1])
+(defn user-answer?
+  [u-question u-ans]
+  (let [u-ans (map second u-ans)]
+    (every? identity (map (fn [a] (some #(= a %) u-ans))  u-question))
+      ))
 
 [{:a 'a0
  :b 'q0
@@ -99,14 +113,19 @@
   :c 'c0}]
 
 (defn get-user-answer-from-questions
-  [user questions]
-  (let []))
+  [user questions u-ans]
+  (let [u-question (map #(conj [user] %) questions)]
+    (map (fn [a] (filter #(user-answer? a %) u-ans))  u-question)))
 
 (defn get-user-answer
-  [user quiz]
+  [user quiz u-ans]
   (let [questions (:questions quiz)
-        u-ans (get-user-answer-from-questions user questions)]
+        u-ans (get-user-answer-from-questions user questions u-ans)]
     u-ans))
+
+(defn get-score
+  [])
+
 
 (defn get-result-quiz
   [user quiz]
