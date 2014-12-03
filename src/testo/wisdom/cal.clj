@@ -62,16 +62,23 @@
 (def question0 {:text "what ?"
                 :answer answer0})
 (def question10 {:text "why ?"
-                 :answer answer0})
+                 :answer answer10})
 
+(def cheat0 {:text "this is bibideba bidebu"
+                })
+(def cheat10 {:text "laliluali"
+                 })
 
 (def user-answers (atom[{:user user1 :q question0 :u-ans "lala"}
                         {:user user0 :q question0 :u-ans "ba"
                          }
-                        {:user user0 :q question10 :u-ans "ba"}]))
+                        {:user user0 :q question10 :u-ans "brute"}]))
 
-(def quiz0 {:quetions [question0
-                       question10]})
+(def quiz0 {:questions [cheat0
+                        question0
+                        cheat10
+                        question10
+                        ]})
 
 (def skor (atom []))
 (defn put-answer
@@ -85,9 +92,9 @@
   [q u-ans]
   (= (:correct-answer (:answer q)) (:u-ans u-ans)))
 
-(defn get-result-qusetion
+(defn get-result-question
   [user-answer]
-  (validate-answer (:q user-answer) (:u-ans user-answer)))
+  (validate-answer (:q user-answer) user-answer))
 
 (defn user-answer?
   [u-question u-ans]
@@ -115,21 +122,29 @@
 (defn get-user-answer-from-questions
   [user questions u-ans]
   (let [u-question (map #(conj [user] %) questions)]
-    (map (fn [a] (filter #(user-answer? a %) u-ans))  u-question)))
+    (mapcat (fn [a] (filter #(user-answer? a %) u-ans))  u-question)))
 
-(defn get-user-answer
+(defn get-user-answers
   [user quiz u-ans]
-  (let [questions (:questions quiz)
-        u-ans (get-user-answer-from-questions user questions u-ans)]
-    u-ans))
+  (let [questions (filter :answer (:questions quiz))
+        user-quiz-answer (get-user-answer-from-questions user questions u-ans)]
+    user-quiz-answer))
 
-(defn get-score
-  [])
+(defn get-user-quiz-result
+  [user-quiz-answer]
+  (map #(assoc % :status (validate-answer (:q %) %)) user-quiz-answer))
 
+(defn get-user-score
+  [user-quiz-result]
+  (let [true-answer (count (filter :status user-quiz-result))
+        total-question (count user-quiz-result)
+        score (-> (* 100 true-answer)
+                  (quot total-question))]
+    score))
 
 (defn get-result-quiz
-  [user quiz]
-  (let [user-ans (get-user-answer user quiz)
-        score (get-score user-ans)
-        history (get-history user-ans)]
-    {:score score :history history}))
+  [user quiz u-ans]
+  (let [user-quiz-answer (get-user-answers user quiz u-ans)
+        user-quiz-result (get-user-quiz-result user-quiz-answer)
+        user-score (get-user-score user-quiz-result)]
+    {:score user-score :quiz-result user-quiz-result}))
